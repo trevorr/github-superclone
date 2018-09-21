@@ -1,0 +1,27 @@
+{
+  "name": "github-superclone",
+  "version": "1.0.0",
+  "description": "Clone all repositories from a GitHub organization",
+  "license": "ISC",
+  "author": {
+    "name": "Trevor Robinson"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trevorr/github-superclone.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "go": "node index.js"
+  },
+  "bin": {
+    "superclone": "index.js"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "commander": "^2.18.0",
+    "parse-link-header": "^1.0.1",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.5"
+  }
+}
