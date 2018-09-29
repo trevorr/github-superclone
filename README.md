@@ -59,3 +59,7 @@ Create a [personal access token](https://github.com/settings/tokens) with `repo`
 and use that instead of a password and two-factor.
 If your organization uses Single Sign-on (SSO), be sure to click the little "SSO" button
 next to your newly created token to authorize it for access.
+
+## License
+
+`github-superclone` is available under the [ISC license](LICENSE).
