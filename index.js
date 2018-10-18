@@ -23,6 +23,7 @@ opts
   .option('-d, --dir <dir>', 'target directory', '.')
   .option('-i, --ignore-forks', 'ignored forked repositories')
   .option('-a, --archived', 'include archived repositories')
+  .option('-f, --force-pull', 'pull repositories regardless of local mtime')
   .option('-n, --dry-run', 'don\'t actually run git')
   .parse(process.argv);
 if (!opts.user && (!opts.orgs || opts.orgs.length === 0)) {
@@ -48,6 +49,7 @@ async function main() {
   const stats = {
     clonedCount: 0,
     pulledCount: 0,
+    upToDateCount: 0,
     skippedCount: 0,
     staleRepos: [],
     errorCount: 0,
@@ -63,7 +65,7 @@ async function main() {
     await fetchRepos('user', opts.user, stats);
   }
   console.log(summaryStyle(`${stats.clonedCount} cloned, ${stats.pulledCount} pulled` +
-    `, ${stats.skippedCount} skipped, ${stats.errorCount} errors`));
+    `, ${stats.upToDateCount} already up-to-date, ${stats.skippedCount} skipped, ${stats.errorCount} errors`));
   if (stats.staleRepos.length > 0) {
     stats.staleRepos.sort();
     console.log(noteEmphasisStyle(`Skipped local repositories: ${stats.staleRepos.join(' ')}`));
@@ -119,7 +121,7 @@ async function fetchRepos(kind, name, stats) {
 }
 
 async function cloneRepo(repo, stats) {
-  const { name, fork, archived, clone_url } = repo;
+  const { name, fork, archived, pushed_at, clone_url } = repo;
 
   const rootDir = opts.dir || '.';
   const dir = path.join(rootDir, name);
@@ -141,6 +143,13 @@ async function cloneRepo(repo, stats) {
 
   let cmd, cwd;
   if (dirExists) {
+    const dirStat = fs.statSync(dir);
+    if (dirStat.mtime >= Date.parse(pushed_at) && !opts.forcePull) {
+      console.log(noteStyle(`Repository ${name} is already up-to-date`));
+      ++stats.upToDateCount;
+      return;
+    }
+
     cmd = `${gitCommand} pull --progress`;
     cwd = dir;
   } else {
