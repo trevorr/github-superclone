@@ -25,6 +25,8 @@ Options:
   -2, --2fa <code>           two-factor authentication code
   -d, --dir <dir>            target directory (default: .)
   -i, --ignore-forks         ignored forked repositories
+  -a, --archived             include archived repositories
+  -f, --force-pull           pull repositories regardless of local mtime
   -n, --dry-run              don't actually run git
   -h, --help                 output usage information
 ```
