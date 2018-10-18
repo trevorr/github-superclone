@@ -22,6 +22,7 @@ opts
   .option('-2, --2fa <code>', 'two-factor authentication code')
   .option('-d, --dir <dir>', 'target directory', '.')
   .option('-i, --ignore-forks', 'ignored forked repositories')
+  .option('-a, --archived', 'include archived repositories')
   .option('-n, --dry-run', 'don\'t actually run git')
   .parse(process.argv);
 if (!opts.user && (!opts.orgs || opts.orgs.length === 0)) {
@@ -36,7 +37,8 @@ if (chalk.supportsColor) {
 }
 
 const commandStyle = chalk.yellowBright;
-const noteStyle = chalk.bold.cyanBright;
+const noteStyle = chalk.bold.blueBright;
+const noteEmphasisStyle = chalk.bold.cyanBright;
 const errorStyle = chalk.bold.redBright;
 const summaryStyle = chalk.magentaBright;
 const stdoutStyle = chalk.reset;
@@ -47,6 +49,7 @@ async function main() {
     clonedCount: 0,
     pulledCount: 0,
     skippedCount: 0,
+    staleRepos: [],
     errorCount: 0,
     errorRepos: []
   };
@@ -61,8 +64,13 @@ async function main() {
   }
   console.log(summaryStyle(`${stats.clonedCount} cloned, ${stats.pulledCount} pulled` +
     `, ${stats.skippedCount} skipped, ${stats.errorCount} errors`));
+  if (stats.staleRepos.length > 0) {
+    stats.staleRepos.sort();
+    console.log(noteEmphasisStyle(`Skipped local repositories: ${stats.staleRepos.join(' ')}`));
+  }
   if (stats.errorRepos.length > 0) {
-    console.log(errorStyle(`Failing repositories: ${stats.errorRepos.join(', ')}`));
+    stats.errorRepos.sort();
+    console.log(errorStyle(`Failing repositories: ${stats.errorRepos.join(' ')}`));
   }
   process.stdin.end();
 }
@@ -111,15 +119,26 @@ async function fetchRepos(kind, name, stats) {
 }
 
 async function cloneRepo(repo, stats) {
-  const { name, fork, clone_url } = repo;
-  if (fork && opts.ignoreForks) {
-    console.log(noteStyle(`Ignoring fork ${name}`));
-    ++stats.skippedCount;
-    return;
-  }
+  const { name, fork, archived, clone_url } = repo;
+
   const rootDir = opts.dir || '.';
   const dir = path.join(rootDir, name);
   const dirExists = fs.existsSync(dir);
+
+  const existsMessage = dirExists ? noteEmphasisStyle(' (but it exists locally)') : '';
+  if (fork && opts.ignoreForks) {
+    console.log(noteStyle(`Ignoring fork ${name}` + existsMessage));
+    ++stats.skippedCount;
+    if (dirExists) stats.staleRepos.push(name);
+    return;
+  }
+  if (archived && !opts.archived) {
+    console.log(noteStyle(`Ignoring archived repository ${name}` + existsMessage));
+    ++stats.skippedCount;
+    if (dirExists) stats.staleRepos.push(name);
+    return;
+  }
+
   let cmd, cwd;
   if (dirExists) {
     cmd = `${gitCommand} pull --progress`;
