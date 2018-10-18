@@ -48,6 +48,8 @@ If you insist, because it does/has all of these things:
 - Clones or pulls, depending on whether the directory exists
 - Supports private repositories if authentication information is provided
 - Optionally ignores forks
+- Ignores archived repositories (or optionally includes them)
+- Compares GitHub pushed-at time with local timestamp to avoid unnecessary pulls
 - Optional dry-run mode to see what would be cloned
 - Pretty colors and progress messages in the output
 - Decent error handling
