@@ -1,6 +1,6 @@
 {
   "name": "github-superclone",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Clone all repositories from a GitHub organization",
   "license": "ISC",
   "author": {

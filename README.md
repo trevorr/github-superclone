@@ -13,6 +13,8 @@ npm install -g github-superclone
 
 ## Usage
 
+### Command-line
+
 ```
 Usage: superclone [options]
 
@@ -29,6 +31,92 @@ Options:
   -f, --force-pull           pull repositories regardless of local mtime
   -n, --dry-run              don't actually run git
   -h, --help                 output usage information
+```
+
+### API
+
+This package can also be used as a library, which exports the following functions.
+
+#### fetchRepos
+
+Fetches all of the repositories for a given organization or user
+and calls the given asynchronous callback for each one.
+
+```typescript
+function fetchRepos(
+  kind: String, // 'org' or 'user'
+  name: String,
+  callback: function(repo, options): Promise<Void>,
+  options: {
+    user: String,
+    password: String,
+    otp: String,
+    userAgent: String = path.basename(process.argv[1], '.js'),
+    pageSize: Number = 100,
+    hooks: {
+      fetchingUrl: function(url: String): Void,
+      fetchFailed: function(url: String, err: Error): Void
+    } = {}
+  } = {}
+): Promise<Void>
+```
+
+#### cloneRepo
+
+Clones or pulls the given repository.
+
+```typescript
+function cloneRepo(
+  repo: {
+    name: String, // required
+    fork: Boolean = false,
+    archived: Boolean = false,
+    pushed_at: Date,
+    clone_url: String // required
+  },
+  options: {
+    dir: String = '.',
+    gitCommand: String = 'git',
+    ignoreForks: Boolean = false,
+    ignoreArchived: Boolean = false,
+    forcePull: Boolean = false,
+    touchPull: Boolean = false,
+    dryRun: Boolean = false,
+    shellOptions = {},
+    hooks: {
+      ignoreFork: function(repo, dirExists: Boolean): Void,
+      ignoreArchived: function(repo, dirExists: Boolean): Void,
+      skipUpToDate: function(repo): Void,
+      runningCommand: function(repo, cmd: String, cwd: String): Void,
+      pullSucceeded: function(repo): Void,
+      cloneSucceeded: function(repo): Void,
+      cloneFailed: function(repo): Void
+    } = {}
+  } = {}
+): Promise<Void>
+```
+
+#### shell
+
+Executes the given command in a subshell and returns the accumulated stdout/stderr strings.
+By default, stdout/stderr of the child process are piped to stdout/stderr of the parent process.
+See [`child_process.spawn`](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options)
+for the definition of `spawnOptions`.
+
+```typescript
+function shell(
+  cmd: String,
+  options: {
+    spawnOptions = {},
+    stdoutEncoding: String = 'utf8',
+    stderrEncoding: String = 'utf8',
+    stdoutWrite: function(s: String): Void = process.stdout.write.bind(process.stdout),
+    stderrWrite: function(s: String): Void = process.stderr.write.bind(process.stderr)
+  } = {}
+): Promise<{
+  stdout: String,
+  stderr: String
+}>
 ```
 
 ## FAQ
@@ -55,6 +143,7 @@ If you insist, because it does/has all of these things:
 - Optional dry-run mode to see what would be cloned
 - Pretty colors and progress messages in the output
 - Decent error handling
+- CLI and library
 - Readable modern JavaScript source code
 
 ### I'm having trouble authenticating -- what should I do?
