@@ -8,7 +8,6 @@ const path = require('path');
 const package = require('./package.json');
 const { cloneRepo } = require('./src/cloneRepo');
 const { fetchRepos } = require('./src/fetchRepos');
-const { shell } = require('./src/shell');
 
 function collect(val, arr) {
   return (arr || []).concat(val.split(','));
@@ -179,9 +178,3 @@ function isGitRepo(dir) {
 }
 
 main().catch(e => console.error(e));
-
-module.exports = {
-  fetchRepos,
-  cloneRepo,
-  shell
-};
