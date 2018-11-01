@@ -79,6 +79,8 @@ function cloneRepo(
   options: {
     dir: String = '.',
     gitCommand: String = 'git',
+    user: String,
+    password: String,
     ignoreForks: Boolean = false,
     ignoreArchived: Boolean = false,
     forcePull: Boolean = false,

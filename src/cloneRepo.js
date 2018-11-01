@@ -15,6 +15,8 @@ async function cloneRepo(repo, options = {}) {
   const {
     dir: rootDir = '.',
     gitCommand = 'git',
+    user,
+    password,
     ignoreForks = false,
     ignoreArchived = false,
     forcePull = false,
@@ -47,7 +49,12 @@ async function cloneRepo(repo, options = {}) {
     cmd = `${gitCommand} pull --progress`;
     cwd = dir;
   } else {
-    cmd = `${gitCommand} clone --progress ${clone_url}`;
+    let url = clone_url;
+    if (user) {
+      const auth = password ? `${user}:${password}` : user;
+      url = url.replace(/:\/\//, `://${auth}@`);
+    }
+    cmd = `${gitCommand} clone --progress ${url}`;
     cwd = rootDir;
   }
   try {
