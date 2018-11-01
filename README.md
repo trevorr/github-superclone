@@ -1,5 +1,7 @@
 # github-superclone
 
+[![npm version](https://badge.fury.io/js/github-superclone.svg)](https://badge.fury.io/js/github-superclone)
+
 ## Overview
 
 Clones or pulls most or all of the repositories of a GitHub user or set of GitHub organizations.
